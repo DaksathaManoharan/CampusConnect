@@ -1,0 +1,2220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Campus Connect — Event Management System</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
+  <style>
+    /* ----- base styles (unchanged) ----- */
+    :root {
+      --ink: #1B1B1F;
+      --ink-70: rgba(27, 27, 31, .72);
+      --ink-45: rgba(27, 27, 31, .48);
+      --paper: #F3EEE1;
+      --paper-2: #EAE1CB;
+      --paper-3: #E0D5B8;
+      --marigold: #FFB627;
+      --coral: #FF5A5F;
+      --teal: #0E5257;
+      --violet: #6C63FF;
+      --line: rgba(27, 27, 31, .16);
+      --shadow: 0 10px 30px rgba(27, 27, 31, .14);
+    }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    html {
+      scroll-behavior: smooth;
+    }
+    body {
+      background: var(--paper);
+      color: var(--ink);
+      font-family: 'Space Grotesk', sans-serif;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      background-image: radial-gradient(circle at 1px 1px, rgba(27, 27, 31, .05) 1px, transparent 0);
+      background-size: 22px 22px;
+      pointer-events: none;
+      z-index: 0;
+    }
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+    ul {
+      list-style: none;
+    }
+    .display {
+      font-family: 'Archivo Black', sans-serif;
+      text-transform: uppercase;
+      letter-spacing: .01em;
+    }
+    .mono {
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .wrap {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 32px;
+      position: relative;
+      z-index: 1;
+    }
+    .eyebrow {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      letter-spacing: .16em;
+      text-transform: uppercase;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--ink-70);
+    }
+    .eyebrow::before {
+      content: "";
+      width: 8px;
+      height: 8px;
+      background: var(--coral);
+      border-radius: 50%;
+      display: inline-block;
+    }
+    section {
+      position: relative;
+      z-index: 1;
+    }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 700;
+      font-size: 13px;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      padding: 14px 24px;
+      border-radius: 100px;
+      border: 2px solid var(--ink);
+      background: var(--ink);
+      color: var(--paper);
+      cursor: pointer;
+      transition: transform .18s ease, box-shadow .18s ease, background .18s ease, color .18s ease;
+    }
+    .btn:hover {
+      transform: translate(-2px, -2px);
+      box-shadow: 4px 4px 0 var(--ink);
+    }
+    .btn.ghost {
+      background: transparent;
+      color: var(--ink);
+    }
+    .btn.ghost:hover {
+      background: var(--ink);
+      color: var(--paper);
+    }
+    .btn.small {
+      padding: 10px 18px;
+      font-size: 11px;
+    }
+    .btn.coral {
+      background: var(--coral);
+      border-color: var(--coral);
+    }
+    .btn.coral:hover {
+      background: var(--ink);
+      border-color: var(--ink);
+      box-shadow: 4px 4px 0 var(--coral);
+    }
+    .btn.teal {
+      background: var(--teal);
+      border-color: var(--teal);
+    }
+    .btn.teal:hover {
+      background: var(--ink);
+      border-color: var(--ink);
+      box-shadow: 4px 4px 0 var(--teal);
+    }
+    .btn.marigold {
+      background: var(--marigold);
+      border-color: var(--marigold);
+      color: var(--ink);
+    }
+    .btn.marigold:hover {
+      background: var(--ink);
+      border-color: var(--ink);
+      color: var(--paper);
+      box-shadow: 4px 4px 0 var(--marigold);
+    }
+    .btn.green {
+      background: var(--teal);
+      border-color: var(--teal);
+      color: var(--paper);
+    }
+    .btn.green:hover {
+      background: var(--ink);
+      border-color: var(--ink);
+      box-shadow: 4px 4px 0 var(--teal);
+    }
+    .btn[disabled] {
+      opacity: .6;
+      pointer-events: none;
+      transform: none !important;
+      box-shadow: none !important;
+    }
+
+    /* ----- navbar ----- */
+    header.nav {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      background: rgba(243, 238, 225, .88);
+      backdrop-filter: blur(10px);
+      border-bottom: 2px solid var(--ink);
+    }
+    .nav-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 16px 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-family: 'Archivo Black', sans-serif;
+      font-size: 20px;
+      text-transform: uppercase;
+    }
+    .logo .dot {
+      width: 14px;
+      height: 14px;
+      background: var(--coral);
+      border-radius: 50%;
+      box-shadow: 6px 0 0 var(--marigold), 12px 0 0 var(--teal);
+      margin-right: 14px;
+    }
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 36px;
+    }
+    .nav-links a {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px;
+      letter-spacing: .04em;
+      text-transform: uppercase;
+      position: relative;
+      padding: 4px 0;
+      cursor: pointer;
+    }
+    .nav-links a::after {
+      content: "";
+      position: absolute;
+      left: 0;
+      bottom: 0;
+      width: 0;
+      height: 2px;
+      background: var(--coral);
+      transition: width .2s ease;
+    }
+    .nav-links a:hover::after {
+      width: 100%;
+    }
+    .nav-links a.active {
+      color: var(--coral);
+    }
+    .nav-cta {
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      flex-wrap: wrap;
+    }
+    .burger {
+      display: none;
+      flex-direction: column;
+      gap: 5px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 6px;
+    }
+    .burger span {
+      width: 24px;
+      height: 2px;
+      background: var(--ink);
+      display: block;
+    }
+    .user-badge {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-family: 'JetBrains Mono';
+      font-size: 12px;
+      background: var(--paper-2);
+      padding: 6px 16px;
+      border-radius: 100px;
+      border: 2px solid var(--ink);
+    }
+
+    /* ----- hero ----- */
+    .hero {
+      padding: 88px 0 60px;
+      position: relative;
+      overflow: hidden;
+    }
+    .hero-grid {
+      display: grid;
+      grid-template-columns: 1.15fr .85fr;
+      gap: 48px;
+      align-items: center;
+    }
+    .hero h1 {
+      font-size: clamp(40px, 5.6vw, 74px);
+      line-height: .98;
+      margin: 18px 0 22px;
+    }
+    .hero h1 .accent {
+      color: var(--coral);
+    }
+    .hero p.lead {
+      font-size: 18px;
+      color: var(--ink-70);
+      max-width: 480px;
+      line-height: 1.55;
+      margin-bottom: 32px;
+    }
+    .stats-row {
+      display: flex;
+      gap: 36px;
+      flex-wrap: wrap;
+    }
+    .stat {
+      display: flex;
+      flex-direction: column;
+    }
+    .stat b {
+      font-family: 'Archivo Black';
+      font-size: 30px;
+    }
+    .stat span {
+      font-family: 'JetBrains Mono';
+      font-size: 11px;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      color: var(--ink-45);
+      margin-top: 4px;
+    }
+    .hero-board {
+      position: relative;
+      height: 520px;
+    }
+    .pin-card {
+      position: absolute;
+      background: var(--paper);
+      border: 2px solid var(--ink);
+      border-radius: 6px;
+      padding: 16px 18px;
+      box-shadow: var(--shadow);
+      width: 230px;
+    }
+    .pin-card::before {
+      content: "";
+      position: absolute;
+      top: -9px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: var(--coral);
+      border: 2px solid var(--ink);
+    }
+    .pin-card .tag {
+      font-family: 'JetBrains Mono';
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      padding: 3px 8px;
+      border-radius: 100px;
+      display: inline-block;
+      margin-bottom: 8px;
+      font-weight: 700;
+    }
+    .pin-card h4 {
+      font-family: 'Space Grotesk';
+      font-weight: 700;
+      font-size: 16px;
+      margin-bottom: 6px;
+      line-height: 1.25;
+    }
+    .pin-card .meta {
+      font-family: 'JetBrains Mono';
+      font-size: 11px;
+      color: var(--ink-45);
+    }
+    .pc-1 {
+      top: 0;
+      right: 40px;
+      transform: rotate(-6deg);
+      z-index: 3;
+    }
+    .pc-1 .tag {
+      background: var(--marigold);
+    }
+    .pc-2 {
+      top: 200px;
+      right: 170px;
+      transform: rotate(4deg);
+      z-index: 2;
+    }
+    .pc-2 .tag {
+      background: var(--coral);
+      color: var(--paper);
+    }
+    .pc-3 {
+      top: 370px;
+      right: 10px;
+      transform: rotate(-3deg);
+      z-index: 4;
+    }
+    .pc-3 .tag {
+      background: var(--teal);
+      color: var(--paper);
+    }
+    .washi {
+      position: absolute;
+      width: 70px;
+      height: 22px;
+      background: rgba(255, 182, 39, .55);
+      top: -8px;
+      left: 50%;
+      transform: translateX(-50%) rotate(-4deg);
+    }
+
+    /* ----- search ----- */
+    .search-wrap {
+      margin-top: -4px;
+    }
+    .search-panel {
+      background: var(--ink);
+      color: var(--paper);
+      border-radius: 100px;
+      padding: 10px 10px 10px 22px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      max-width: 640px;
+      box-shadow: var(--shadow);
+    }
+    .search-panel input {
+      flex: 1;
+      background: transparent;
+      border: none;
+      outline: none;
+      font-family: 'Space Grotesk';
+      font-size: 15px;
+      color: var(--paper);
+      padding: 10px 0;
+    }
+    .search-panel input::placeholder {
+      color: rgba(243, 238, 225, .5);
+    }
+    .search-panel button {
+      background: var(--marigold);
+      color: var(--ink);
+      border: none;
+      border-radius: 100px;
+      padding: 12px 22px;
+      font-family: 'JetBrains Mono';
+      font-weight: 700;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: .05em;
+      cursor: pointer;
+      transition: transform .15s ease;
+    }
+    .search-panel button:hover {
+      transform: scale(1.04);
+    }
+
+    /* ----- section heads ----- */
+    .sec-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      margin-bottom: 44px;
+      gap: 24px;
+      flex-wrap: wrap;
+    }
+    .sec-head h2 {
+      font-size: clamp(30px, 4vw, 46px);
+      margin-top: 12px;
+      max-width: 560px;
+    }
+    .sec-head p {
+      color: var(--ink-70);
+      max-width: 360px;
+      font-size: 15px;
+      line-height: 1.5;
+    }
+
+    /* ----- categories (decorative) ----- */
+    .categories {
+      padding: 100px 0 40px;
+    }
+    .cat-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 22px;
+    }
+    .cat-card {
+      background: var(--paper-2);
+      border: 2px solid var(--ink);
+      border-radius: 10px;
+      padding: 26px 22px;
+      position: relative;
+      overflow: hidden;
+      cursor: pointer;
+      transition: transform .2s ease, box-shadow .2s ease;
+    }
+    .cat-card:nth-child(1) {
+      transform: rotate(-1.4deg);
+    }
+    .cat-card:nth-child(2) {
+      transform: rotate(1deg);
+    }
+    .cat-card:nth-child(3) {
+      transform: rotate(-.8deg);
+    }
+    .cat-card:nth-child(4) {
+      transform: rotate(1.6deg);
+    }
+    .cat-card:hover {
+      transform: rotate(0deg) translateY(-6px);
+      box-shadow: var(--shadow);
+    }
+    .cat-icon {
+      width: 46px;
+      height: 46px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 22px;
+      border: 2px solid var(--ink);
+    }
+    .cat-card h3 {
+      font-family: 'Archivo Black';
+      font-size: 19px;
+      margin-bottom: 8px;
+    }
+    .cat-card p {
+      font-size: 13.5px;
+      color: var(--ink-70);
+      line-height: 1.5;
+      margin-bottom: 18px;
+    }
+    .cat-count {
+      font-family: 'JetBrains Mono';
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      color: var(--ink-45);
+    }
+    .cat-technical .cat-icon {
+      background: var(--marigold);
+    }
+    .cat-cultural .cat-icon {
+      background: var(--coral);
+    }
+    .cat-sports .cat-icon {
+      background: var(--teal);
+    }
+    .cat-workshops .cat-icon {
+      background: var(--violet);
+    }
+
+    /* ----- events (ticket stubs) ----- */
+    .events {
+      padding: 100px 0 40px;
+    }
+    .filter-row {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 40px;
+      flex-wrap: wrap;
+    }
+    .chip {
+      font-family: 'JetBrains Mono';
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: .05em;
+      padding: 9px 18px;
+      border-radius: 100px;
+      border: 2px solid var(--ink);
+      background: transparent;
+      cursor: pointer;
+      transition: all .15s ease;
+    }
+    .chip.active,
+    .chip:hover {
+      background: var(--ink);
+      color: var(--paper);
+    }
+    .event-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 28px;
+    }
+    .ticket {
+      display: flex;
+      background: var(--paper-2);
+      border: 2px solid var(--ink);
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 6px 6px 0 rgba(27, 27, 31, .08);
+      transition: transform .2s ease, box-shadow .2s ease;
+      opacity: 0;
+      transform: translateY(18px);
+    }
+    .ticket.reveal {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    .ticket:hover {
+      transform: translateY(-6px);
+      box-shadow: 8px 10px 0 rgba(27, 27, 31, .14);
+    }
+    .ticket-main {
+      flex: 1;
+      padding: 22px 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .ticket-tag {
+      align-self: flex-start;
+      font-family: 'JetBrains Mono';
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: .07em;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: 100px;
+    }
+    .tag-technical {
+      background: var(--marigold);
+    }
+    .tag-cultural {
+      background: var(--coral);
+      color: var(--paper);
+    }
+    .tag-sports {
+      background: var(--teal);
+      color: var(--paper);
+    }
+    .tag-workshops {
+      background: var(--violet);
+      color: var(--paper);
+    }
+    .ticket-main h4 {
+      font-size: 18px;
+      line-height: 1.3;
+    }
+    .ticket-main .loc {
+      font-size: 13px;
+      color: var(--ink-70);
+    }
+    .ticket-stub {
+      width: 96px;
+      flex-shrink: 0;
+      background: var(--ink);
+      color: var(--paper);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      position: relative;
+      padding: 14px 6px;
+      border-left: 2px dashed rgba(243, 238, 225, .4);
+    }
+    .ticket-stub::before,
+    .ticket-stub::after {
+      content: "";
+      position: absolute;
+      left: -9px;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: var(--paper);
+      border: 2px solid var(--ink);
+    }
+    .ticket-stub::before {
+      top: -9px;
+    }
+    .ticket-stub::after {
+      bottom: -9px;
+    }
+    .ticket-stub .day {
+      font-family: 'Archivo Black';
+      font-size: 26px;
+      line-height: 1;
+    }
+    .ticket-stub .mon {
+      font-family: 'JetBrains Mono';
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+    }
+    .ticket-stub .time {
+      font-family: 'JetBrains Mono';
+      font-size: 10px;
+      opacity: .7;
+      margin-top: 6px;
+      text-align: center;
+    }
+
+    /* ----- why join (decorative) ----- */
+    .why {
+      padding: 110px 0 40px;
+    }
+    .why-grid {
+      display: grid;
+      grid-template-columns: .9fr 1.1fr;
+      gap: 56px;
+      align-items: center;
+    }
+    .why-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+    }
+    .why-item {
+      display: flex;
+      gap: 20px;
+      padding: 26px 0;
+      border-bottom: 1px solid var(--line);
+    }
+    .why-item:first-child {
+      border-top: 1px solid var(--line);
+    }
+    .why-num {
+      font-family: 'JetBrains Mono';
+      font-size: 13px;
+      color: var(--ink-45);
+      padding-top: 3px;
+    }
+    .why-item h4 {
+      font-size: 19px;
+      margin-bottom: 6px;
+    }
+    .why-item p {
+      font-size: 14.5px;
+      color: var(--ink-70);
+      line-height: 1.55;
+      max-width: 420px;
+    }
+    .why-visual {
+      position: relative;
+      height: 420px;
+      border: 2px solid var(--ink);
+      border-radius: 12px;
+      background: repeating-linear-gradient(135deg, var(--paper-2), var(--paper-2) 18px, var(--paper-3) 18px, var(--paper-3) 36px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+    .why-visual .badge {
+      background: var(--paper);
+      border: 2px solid var(--ink);
+      border-radius: 14px;
+      padding: 34px 30px;
+      text-align: center;
+      box-shadow: var(--shadow);
+      transform: rotate(-2deg);
+    }
+    .why-visual .badge .big {
+      font-family: 'Archivo Black';
+      font-size: 52px;
+      color: var(--coral);
+    }
+    .why-visual .badge span {
+      font-family: 'JetBrains Mono';
+      font-size: 11px;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      color: var(--ink-70);
+    }
+
+    /* ----- testimonials (decorative) ----- */
+    .testimonials {
+      padding: 110px 0 40px;
+    }
+    .test-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 26px;
+    }
+    .test-card {
+      background: var(--paper);
+      border: 2px solid var(--ink);
+      border-radius: 10px;
+      padding: 28px 24px;
+      position: relative;
+      box-shadow: var(--shadow);
+    }
+    .test-card:nth-child(1) {
+      transform: rotate(-1.6deg);
+    }
+    .test-card:nth-child(2) {
+      transform: rotate(1deg);
+    }
+    .test-card:nth-child(3) {
+      transform: rotate(-.6deg);
+    }
+    .test-tape {
+      position: absolute;
+      top: -10px;
+      left: 50%;
+      transform: translateX(-50%) rotate(-3deg);
+      width: 64px;
+      height: 20px;
+      background: rgba(108, 99, 255, .35);
+    }
+    .test-quote {
+      font-size: 15.5px;
+      line-height: 1.6;
+      margin: 10px 0 20px;
+    }
+    .test-who {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .avatar {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      border: 2px solid var(--ink);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Archivo Black';
+      font-size: 14px;
+    }
+    .test-who .name {
+      font-weight: 700;
+      font-size: 13.5px;
+    }
+    .test-who .role {
+      font-family: 'JetBrains Mono';
+      font-size: 11px;
+      color: var(--ink-45);
+    }
+
+    /* ----- contact ----- */
+    .contact {
+      padding: 110px 0 40px;
+    }
+    .contact-panel {
+      background: var(--ink);
+      color: var(--paper);
+      border-radius: 16px;
+      padding: 56px;
+      display: grid;
+      grid-template-columns: .9fr 1.1fr;
+      gap: 50px;
+    }
+    .contact-panel .eyebrow {
+      color: rgba(243, 238, 225, .6);
+    }
+    .contact-panel h2 {
+      font-size: clamp(26px, 3.4vw, 38px);
+      margin: 14px 0 16px;
+    }
+    .contact-panel p.lead {
+      color: rgba(243, 238, 225, .65);
+      font-size: 14.5px;
+      line-height: 1.6;
+      max-width: 360px;
+    }
+    .contact-info {
+      margin-top: 32px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .contact-info div {
+      font-family: 'JetBrains Mono';
+      font-size: 13px;
+      display: flex;
+      gap: 10px;
+    }
+    .contact-info span.label {
+      color: rgba(243, 238, 225, .45);
+      width: 70px;
+      flex-shrink: 0;
+    }
+    .form-row {
+      display: flex;
+      gap: 16px;
+    }
+    .form-group {
+      flex: 1;
+      margin-bottom: 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .form-group label {
+      font-family: 'JetBrains Mono';
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      color: rgba(243, 238, 225, .6);
+    }
+    .form-group input,
+    .form-group textarea {
+      background: rgba(243, 238, 225, .06);
+      border: 1px solid rgba(243, 238, 225, .25);
+      border-radius: 8px;
+      padding: 12px 14px;
+      color: var(--paper);
+      font-family: 'Space Grotesk';
+      font-size: 14px;
+      outline: none;
+      width: 100%;
+    }
+    .form-group input:focus,
+    .form-group textarea:focus {
+      border-color: var(--marigold);
+    }
+    .contact-panel .btn {
+      background: var(--marigold);
+      border-color: var(--marigold);
+      color: var(--ink);
+      width: 100%;
+      justify-content: center;
+    }
+    .contact-panel .btn:hover {
+      box-shadow: 4px 4px 0 rgba(243, 238, 225, .4);
+    }
+
+    /* ----- footer ----- */
+    footer {
+      background: var(--ink);
+      color: var(--paper);
+      margin-top: 100px;
+      padding-top: 70px;
+    }
+    .footer-top {
+      display: grid;
+      grid-template-columns: 1.4fr 1fr 1fr 1.2fr;
+      gap: 40px;
+      padding-bottom: 56px;
+      border-bottom: 1px solid rgba(243, 238, 225, .15);
+    }
+    .footer-brand .logo {
+      color: var(--paper);
+    }
+    .footer-brand p {
+      color: rgba(243, 238, 225, .55);
+      font-size: 13.5px;
+      margin-top: 14px;
+      max-width: 260px;
+      line-height: 1.6;
+    }
+    .footer-col h5 {
+      font-family: 'JetBrains Mono';
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      color: rgba(243, 238, 225, .45);
+      margin-bottom: 18px;
+    }
+    .footer-col a {
+      display: block;
+      font-size: 14px;
+      color: rgba(243, 238, 225, .85);
+      margin-bottom: 12px;
+      transition: color .15s ease;
+    }
+    .footer-col a:hover {
+      color: var(--marigold);
+    }
+    .footer-newsletter input {
+      width: 100%;
+      background: rgba(243, 238, 225, .06);
+      border: 1px solid rgba(243, 238, 225, .25);
+      border-radius: 8px;
+      padding: 11px 14px;
+      color: var(--paper);
+      font-family: 'Space Grotesk';
+      font-size: 13.5px;
+      margin-bottom: 10px;
+      outline: none;
+    }
+    .footer-bottom {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 26px 0;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .footer-bottom p {
+      font-family: 'JetBrains Mono';
+      font-size: 12px;
+      color: rgba(243, 238, 225, .45);
+    }
+    .socials {
+      display: flex;
+      gap: 14px;
+    }
+    .socials a {
+      width: 34px;
+      height: 34px;
+      border: 1px solid rgba(243, 238, 225, .3);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all .15s ease;
+    }
+    .socials a:hover {
+      background: var(--marigold);
+      border-color: var(--marigold);
+    }
+
+    /* ----- overlays ----- */
+    .overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(27, 27, 31, .5);
+      backdrop-filter: blur(6px);
+      z-index: 999;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+    }
+    .overlay.open {
+      display: flex;
+    }
+    .overlay-card {
+      background: var(--paper);
+      border: 2px solid var(--ink);
+      border-radius: 12px;
+      padding: 2.5rem;
+      max-width: 520px;
+      width: 100%;
+      box-shadow: 10px 10px 0 rgba(27, 27, 31, .12);
+      position: relative;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+    .overlay-close {
+      position: absolute;
+      top: 14px;
+      right: 18px;
+      font-size: 24px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--ink);
+      opacity: .5;
+      transition: opacity .15s;
+    }
+    .overlay-close:hover {
+      opacity: 1;
+    }
+    .overlay-card .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 1.5rem;
+    }
+    .overlay-card .brand .dot {
+      width: 14px;
+      height: 14px;
+      background: var(--coral);
+      border-radius: 50%;
+      box-shadow: 6px 0 0 var(--marigold), 12px 0 0 var(--teal);
+    }
+    .overlay-card .brand h1 {
+      font-family: 'Archivo Black';
+      font-size: 22px;
+      text-transform: uppercase;
+    }
+    .overlay-card .role-tabs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 1.5rem;
+      flex-wrap: wrap;
+    }
+    .overlay-card .role-btn {
+      font-family: 'JetBrains Mono';
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      padding: 6px 16px;
+      border-radius: 100px;
+      border: 2px solid var(--ink);
+      background: transparent;
+      cursor: pointer;
+      transition: all .15s ease;
+    }
+    .overlay-card .role-btn.active {
+      background: var(--ink);
+      color: var(--paper);
+    }
+    .input-group {
+      margin-bottom: 1.2rem;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .input-group label {
+      font-family: 'JetBrains Mono';
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      color: var(--ink-70);
+    }
+    .input-group input,
+    .input-group select,
+    .input-group textarea {
+      background: rgba(27, 27, 31, .04);
+      border: 1px solid rgba(27, 27, 31, .25);
+      border-radius: 6px;
+      padding: 10px 14px;
+      font-family: 'Space Grotesk';
+      font-size: 14px;
+      color: var(--ink);
+      outline: none;
+      width: 100%;
+    }
+    .input-group select {
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%231B1B1F' stroke-width='2' fill='none'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 14px center;
+      cursor: pointer;
+    }
+    .input-group input:focus,
+    .input-group select:focus,
+    .input-group textarea:focus {
+      border-color: var(--coral);
+      box-shadow: 0 0 0 3px rgba(255, 90, 95, .15);
+    }
+    .flex-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin: 1rem 0 1.5rem;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .remember {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 13px;
+    }
+    .forgot-link {
+      font-family: 'JetBrains Mono';
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      border-bottom: 2px solid transparent;
+      transition: border-color .15s;
+      cursor: pointer;
+    }
+    .forgot-link:hover {
+      border-bottom-color: var(--coral);
+    }
+
+    /* ----- dashboard cards ----- */
+    .stat-card {
+      background: var(--paper);
+      border: 2px solid var(--ink);
+      border-radius: 8px;
+      padding: 20px 24px;
+      box-shadow: var(--shadow);
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .stat-card .icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      border: 2px solid var(--ink);
+    }
+    .stat-card .info h4 {
+      font-size: 13px;
+      color: var(--ink-70);
+      font-weight: 500;
+    }
+    .stat-card .info .num {
+      font-family: 'Archivo Black';
+      font-size: 28px;
+    }
+
+    /* ----- table ----- */
+    .table-wrap {
+      overflow-x: auto;
+      border: 2px solid var(--ink);
+      border-radius: 8px;
+      background: var(--paper);
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+    }
+    th,
+    td {
+      padding: 12px 16px;
+      text-align: left;
+      border-bottom: 1px solid var(--line);
+    }
+    th {
+      font-family: 'JetBrains Mono';
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      background: var(--paper-2);
+    }
+    tr:last-child td {
+      border-bottom: none;
+    }
+    .badge {
+      display: inline-block;
+      padding: 2px 12px;
+      border-radius: 100px;
+      font-size: 11px;
+      font-weight: 700;
+      font-family: 'JetBrains Mono';
+      text-transform: uppercase;
+      border: 1px solid var(--ink);
+    }
+    .badge-yellow {
+      background: var(--marigold);
+    }
+    .badge-green {
+      background: var(--teal);
+      color: var(--paper);
+    }
+    .badge-red {
+      background: var(--coral);
+      color: var(--paper);
+    }
+    .badge-purple {
+      background: var(--violet);
+      color: var(--paper);
+    }
+    .badge-pending {
+      background: #fbbf24;
+      color: var(--ink);
+    }
+
+    /* ----- profile card ----- */
+    .profile-card {
+      background: var(--paper-2);
+      border: 2px solid var(--ink);
+      border-radius: 12px;
+      padding: 28px 32px;
+      box-shadow: var(--shadow);
+      margin-bottom: 40px;
+    }
+    .profile-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px 32px;
+    }
+    .profile-item {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    .profile-item label {
+      font-family: 'JetBrains Mono';
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: .05em;
+      color: var(--ink-45);
+    }
+    .profile-item span {
+      font-size: 15px;
+      font-weight: 500;
+    }
+    .profile-actions {
+      display: flex;
+      gap: 12px;
+      margin-top: 20px;
+      flex-wrap: wrap;
+    }
+
+    /* ----- grid helpers ----- */
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 28px;
+    }
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 28px;
+    }
+    .grid-4 {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 24px;
+    }
+    .text-muted {
+      color: var(--ink-70);
+    }
+    .text-small {
+      font-size: 13px;
+    }
+    .text-center {
+      text-align: center;
+    }
+    .mt-2 {
+      margin-top: 2rem;
+    }
+    .mb-2 {
+      margin-bottom: 2rem;
+    }
+    hr {
+      border: none;
+      border-top: 2px solid var(--line);
+      margin: 2rem 0;
+    }
+    .page {
+      display: none;
+    }
+    .page.active {
+      display: block;
+    }
+    .reveal-on-scroll {
+      opacity: 0;
+      transform: translateY(24px);
+      transition: opacity .6s ease, transform .6s ease;
+    }
+    .reveal-on-scroll.in {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* ----- responsive ----- */
+    @media (max-width: 980px) {
+      .hero-grid {
+        grid-template-columns: 1fr;
+      }
+      .hero-board {
+        display: none;
+      }
+      .cat-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+      .event-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+      .why-grid {
+        grid-template-columns: 1fr;
+      }
+      .test-grid {
+        grid-template-columns: 1fr;
+      }
+      .contact-panel {
+        grid-template-columns: 1fr;
+        padding: 36px;
+      }
+      .footer-top {
+        grid-template-columns: 1fr 1fr;
+      }
+      .grid-2,
+      .grid-3,
+      .grid-4 {
+        grid-template-columns: 1fr 1fr;
+      }
+      .profile-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+    @media (max-width: 640px) {
+      .nav-links {
+        display: none;
+      }
+      .burger {
+        display: flex;
+      }
+      .cat-grid,
+      .event-grid,
+      .grid-2,
+      .grid-3,
+      .grid-4 {
+        grid-template-columns: 1fr;
+      }
+      .footer-top {
+        grid-template-columns: 1fr;
+      }
+      .form-row {
+        flex-direction: column;
+        gap: 0;
+      }
+      .stats-row {
+        gap: 22px;
+      }
+      .wrap {
+        padding: 0 20px;
+      }
+      .overlay-card {
+        padding: 1.5rem;
+      }
+      .profile-actions {
+        flex-direction: column;
+      }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      * {
+        animation: none !important;
+        transition: none !important;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ===== NAVBAR ===== -->
+  <header class="nav">
+    <div class="nav-inner">
+      <a href="#" class="logo" onclick="showPage('home')"><span class="dot"></span>Campus Connect</a>
+      <nav class="nav-links" id="navLinks">
+        <a class="active" data-page="home">Home</a>
+        <a data-page="browse">Browse Events</a>
+        <a data-page="dashboard" style="display:none;">Dashboard</a>
+        <a data-page="myevents" style="display:none;">My Events</a>
+        <a data-page="admin" style="display:none;">Admin</a>
+      </nav>
+      <div class="nav-cta">
+        <span id="userBadge" class="user-badge" style="display:none;">👤 <span id="userName">User</span></span>
+        <a href="#" class="btn ghost small" id="loginBtn" onclick="openLogin()">Log In</a>
+        <a href="#" class="btn small" id="registerBtn" onclick="openRegister()">Register</a>
+        <a href="#" class="btn small" style="display:none; background:var(--coral); border-color:var(--coral);" id="logoutBtn" onclick="logout()">Logout</a>
+        <button class="burger" aria-label="Menu" onclick="toggleMenu()"><span></span><span></span><span></span></button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ===== LOGIN OVERLAY ===== -->
+  <div class="overlay" id="loginOverlay">
+    <div class="overlay-card">
+      <button class="overlay-close" onclick="closeLogin()">✕</button>
+      <div class="brand"><span class="dot"></span><h1>Campus Connect</h1></div>
+      <span class="eyebrow">sign in · with student ID</span>
+      <div class="role-tabs" id="loginRoleTabs">
+        <button class="role-btn active" data-role="student">🎓 Student</button>
+        <button class="role-btn" data-role="admin">⚡ Admin</button>
+      </div>
+      <form onsubmit="handleLogin(event)">
+        <div class="input-group">
+          <label>Register Number / Student ID</label>
+          <input id="loginRegNo" type="text" placeholder="e.g. 2024CS101" required />
+        </div>
+        <div class="flex-row">
+          <label class="remember"><input type="checkbox" checked> Remember me</label>
+        </div>
+        <button class="btn" style="width:100%; justify-content:center;" type="submit">Log in →</button>
+      </form>
+      <div class="text-center mt-2 text-muted text-small">Don't have an account? <a href="#" onclick="closeLogin();openRegister()" style="font-weight:700;border-bottom:2px solid var(--coral);">Register</a></div>
+    </div>
+  </div>
+
+  <!-- ===== REGISTER OVERLAY ===== -->
+  <div class="overlay" id="registerOverlay">
+    <div class="overlay-card" style="max-width:560px;">
+      <button class="overlay-close" onclick="closeRegister()">✕</button>
+      <div class="brand"><span class="dot"></span><h1>Campus Connect</h1></div>
+      <span class="eyebrow">create account · join the board</span>
+      <form onsubmit="handleRegister(event)">
+        <div class="grid-2" style="gap:1rem;">
+          <div class="input-group" style="grid-column:1/-1;"><label>Full Name</label><input id="regName" type="text" placeholder="e.g. Priya Menon" required /></div>
+          <div class="input-group"><label>Register Number</label><input id="regNumber" type="text" placeholder="e.g. 2024CS101" required /></div>
+          <div class="input-group">
+            <label>Department</label>
+            <select id="regDept" required>
+              <option value="">Select</option>
+              <option value="Computer Science">Computer Science</option>
+              <option value="Information Technology">Information Technology</option>
+              <option value="Food Technology">Food Technology</option>
+              <option value="Civil">Civil</option>
+              <option value="AIML">AIML</option>
+              <option value="Agricultural Engineering">Agricultural Engineering</option>
+              <option value="Cybersecurity">Cybersecurity</option>
+            </select>
+          </div>
+          <div class="input-group">
+            <label>Year</label>
+            <select id="regYear" required>
+              <option value="">Select</option>
+              <option value="1">1st Year</option>
+              <option value="2">2nd Year</option>
+              <option value="3">3rd Year</option>
+              <option value="4">4th Year</option>
+            </select>
+          </div>
+          <div class="input-group" style="grid-column:1/-1;"><label>Email</label><input id="regEmail" type="email" placeholder="you@college.edu" required /></div>
+          <div class="input-group" style="grid-column:1/-1;"><label>Phone</label><input id="regPhone" type="tel" placeholder="+91 98765 43210" required /></div>
+          <div class="input-group"><label>Password</label><input id="regPassword" type="password" placeholder="••••••••" required /></div>
+          <div class="input-group"><label>Confirm Password</label><input id="regConfirm" type="password" placeholder="••••••••" required /></div>
+        </div>
+        <button class="btn" style="width:100%; justify-content:center; margin-top:0.5rem;" type="submit">Create account →</button>
+      </form>
+      <div class="text-center mt-2 text-muted text-small">Already have an account? <a href="#" onclick="closeRegister();openLogin()" style="font-weight:700;border-bottom:2px solid var(--coral);">Log in</a></div>
+    </div>
+  </div>
+
+  <!-- ===== ADMIN CREATE EVENT OVERLAY ===== -->
+  <div class="overlay" id="adminCreateEventOverlay">
+    <div class="overlay-card" style="max-width:600px;">
+      <button class="overlay-close" onclick="closeAdminCreateEvent()">✕</button>
+      <div class="brand"><span class="dot"></span><h1>Add Event</h1></div>
+      <form onsubmit="handleAdminCreateEvent(event)">
+        <div class="input-group"><label>Event Name</label><input id="aevName" type="text" placeholder="e.g. CodeStorm Hackathon" required /></div>
+        <div class="input-group"><label>Category</label>
+          <select id="aevCategory" required>
+            <option value="">Select</option>
+            <option value="Technical">Technical</option>
+            <option value="Cultural">Cultural</option>
+            <option value="Sports">Sports</option>
+            <option value="Workshops">Workshops</option>
+          </select>
+        </div>
+        <div class="grid-2">
+          <div class="input-group"><label>Date</label><input id="aevDate" type="date" required /></div>
+          <div class="input-group"><label>Time</label><input id="aevTime" type="time" required /></div>
+        </div>
+        <div class="input-group"><label>Venue</label><input id="aevVenue" type="text" placeholder="e.g. Innovation Hub" required /></div>
+        <div class="input-group"><label>Description</label><textarea id="aevDesc" placeholder="Describe your event..." rows="3"></textarea></div>
+        <div class="grid-2">
+          <div class="input-group"><label>Registration Limit</label><input id="aevLimit" type="number" placeholder="100" value="100" required /></div>
+          <div class="input-group"><label>Registration Deadline</label><input id="aevDeadline" type="date" required /></div>
+        </div>
+        <button class="btn" style="width:100%; justify-content:center; margin-top:0.5rem;" type="submit">Create Event →</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- ===== PAGE: HOME ===== -->
+  <div class="page active" id="page-home">
+    <section class="hero">
+      <div class="wrap hero-grid">
+        <div>
+          <span class="eyebrow">Live on campus — Aug 2026</span>
+          <h1 class="display">Every campus<br />moment, <span class="accent">one board.</span></h1>
+          <p class="lead">Fests, hackathons, matches, and workshops — all pinned to a single board.</p>
+          <div class="search-wrap">
+            <div class="search-panel">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+              <input id="homeSearch" type="text" placeholder="Search events, clubs, venues…" />
+              <button onclick="searchEvents()">Search</button>
+            </div>
+          </div>
+          <div class="stats-row" style="margin-top:38px;">
+            <div class="stat"><b id="totalEventsStat">0</b><span>Events this semester</span></div>
+            <div class="stat"><b>38</b><span>Colleges connected</span></div>
+            <div class="stat"><b id="totalStudentsStat">0</b><span>Students joined</span></div>
+          </div>
+        </div>
+        <div class="hero-board">
+          <div class="pin-card pc-1"><div class="washi"></div><span class="tag" style="color:var(--ink);">Technical</span><h4>CodeStorm Hackathon</h4><div class="meta">Aug 02 · Innovation Hub</div></div>
+          <div class="pin-card pc-2"><div class="washi"></div><span class="tag">Cultural</span><h4>Vaibhav Fest</h4><div class="meta">Aug 05 · Open Air Theatre</div></div>
+          <div class="pin-card pc-3"><div class="washi"></div><span class="tag">Sports</span><h4>Inter-College Football Cup</h4><div class="meta">Aug 08 · Main Ground</div></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Profile Section (shown after login) -->
+    <section id="profileSection" style="display:none; padding:0 0 40px;">
+      <div class="wrap">
+        <div class="profile-card">
+          <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:12px;">
+            <h2 style="font-size:24px;">👋 Welcome, <span id="profileName"></span></h2>
+            <span class="badge badge-green" id="profileRole"></span>
+          </div>
+          <div class="profile-grid" style="margin-top:16px;">
+            <div class="profile-item"><label>Register Number</label><span id="profileRegNo"></span></div>
+            <div class="profile-item"><label>Email</label><span id="profileEmail"></span></div>
+            <div class="profile-item"><label>Department</label><span id="profileDept"></span></div>
+            <div class="profile-item"><label>Year</label><span id="profileYear"></span></div>
+            <div class="profile-item"><label>Phone</label><span id="profilePhone"></span></div>
+            <div class="profile-item"><label>Registered Events</label><span id="profileRegCount">0</span></div>
+            <div class="profile-item"><label>Upcoming Events</label><span id="profileUpcomingCount">0</span></div>
+          </div>
+          <div class="profile-actions">
+            <button class="btn small teal" onclick="showPage('browse')">Browse Events</button>
+            <button class="btn small marigold" onclick="showPage('myevents')">My Events</button>
+            <button class="btn small coral" onclick="logout()">Logout</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="events" id="events">
+      <div class="wrap">
+        <div class="sec-head"><div><span class="eyebrow">Coming up next</span><h2>Featured events</h2></div><p>All events are free. Tap to register.</p></div>
+        <div class="filter-row">
+          <button class="chip active" data-filter="All" onclick="filterEvents('All')">All</button>
+          <button class="chip" data-filter="Technical" onclick="filterEvents('Technical')">Technical</button>
+          <button class="chip" data-filter="Cultural" onclick="filterEvents('Cultural')">Cultural</button>
+          <button class="chip" data-filter="Sports" onclick="filterEvents('Sports')">Sports</button>
+          <button class="chip" data-filter="Workshops" onclick="filterEvents('Workshops')">Workshops</button>
+        </div>
+        <div class="event-grid" id="homeEventGrid"></div>
+      </div>
+    </section>
+
+    <section class="contact"><div class="wrap"><div class="contact-panel">
+      <div><span class="eyebrow">Get in touch</span><h2 class="display" style="text-transform:none;">Questions, or want<br />to list an event?</h2><p class="lead">Reach the Campus Connect team directly.</p></div>
+      <form onsubmit="event.preventDefault(); this.querySelector('.btn').textContent='Sent ✓';"><div class="form-row"><div class="form-group"><label>Name</label><input type="text" placeholder="Your full name" required /></div><div class="form-group"><label>Email</label><input type="email" placeholder="you@college.edu" required /></div></div><div class="form-group"><label>Subject</label><input type="text" placeholder="What's this about?" /></div><div class="form-group"><label>Message</label><textarea placeholder="Tell us a bit more…" required></textarea></div><button class="btn" type="submit">Send message</button></form>
+    </div></div></section>
+  </div>
+
+  <!-- ===== PAGE: BROWSE ===== -->
+  <div class="page" id="page-browse">
+    <section style="padding:100px 0 40px;">
+      <div class="wrap">
+        <div class="sec-head"><div><span class="eyebrow">Discover</span><h2>Browse All Events</h2></div></div>
+        <div class="filter-row">
+          <button class="chip active" data-filter="All" onclick="filterEvents('All')">All</button>
+          <button class="chip" data-filter="Technical" onclick="filterEvents('Technical')">Technical</button>
+          <button class="chip" data-filter="Cultural" onclick="filterEvents('Cultural')">Cultural</button>
+          <button class="chip" data-filter="Sports" onclick="filterEvents('Sports')">Sports</button>
+          <button class="chip" data-filter="Workshops" onclick="filterEvents('Workshops')">Workshops</button>
+        </div>
+        <div class="event-grid" id="browseEventGrid"></div>
+      </div>
+    </section>
+  </div>
+
+  <!-- ===== PAGE: DASHBOARD (student) ===== -->
+  <div class="page" id="page-dashboard">
+    <section style="padding:100px 0 40px;">
+      <div class="wrap">
+        <div class="sec-head"><div><span class="eyebrow">Student</span><h2>Dashboard</h2></div></div>
+        <div class="grid-4" style="margin-bottom:40px;">
+          <div class="stat-card"><div class="icon" style="background:var(--marigold);">📋</div><div class="info"><h4>Registered</h4><div class="num" id="dashRegistered">0</div></div></div>
+          <div class="stat-card"><div class="icon" style="background:var(--teal);">📅</div><div class="info"><h4>Upcoming</h4><div class="num" id="dashUpcoming">0</div></div></div>
+          <div class="stat-card"><div class="icon" style="background:var(--violet);">🎓</div><div class="info"><h4>Certificates</h4><div class="num" id="dashCertificates">0</div></div></div>
+          <div class="stat-card"><div class="icon" style="background:var(--coral);">🔔</div><div class="info"><h4>Notifications</h4><div class="num" id="dashNotifications">0</div></div></div>
+        </div>
+        <div class="grid-2">
+          <div><h3>Your Registered Events</h3><div id="dashEventList" style="margin-top:16px;"></div></div>
+          <div><h3>Quick Actions</h3><div style="margin-top:16px; display:flex; flex-direction:column; gap:12px;"><button class="btn" style="width:100%; justify-content:center;" onclick="showPage('browse')">Browse Events</button><button class="btn coral" style="width:100%; justify-content:center;" onclick="showPage('myevents')">My Events</button></div></div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- ===== PAGE: MY EVENTS ===== -->
+  <div class="page" id="page-myevents">
+    <section style="padding:100px 0 40px;">
+      <div class="wrap">
+        <div class="sec-head"><div><span class="eyebrow">Student</span><h2>My Events</h2></div><p>All your registered events.</p></div>
+        <div class="event-grid" id="myEventsList"></div>
+      </div>
+    </section>
+  </div>
+
+  <!-- ===== PAGE: ADMIN ===== -->
+  <div class="page" id="page-admin">
+    <section style="padding:100px 0 40px;">
+      <div class="wrap">
+        <div class="sec-head">
+          <div><span class="eyebrow">Admin</span><h2>Dashboard</h2></div>
+          <button class="btn marigold" onclick="openAdminCreateEvent()">+ Add Event</button>
+        </div>
+        <div class="grid-4" style="margin-bottom:40px;">
+          <div class="stat-card"><div class="icon" style="background:var(--violet);">👨‍🎓</div><div class="info"><h4>Students</h4><div class="num" id="adminStudents">0</div></div></div>
+          <div class="stat-card"><div class="icon" style="background:var(--marigold);">📋</div><div class="info"><h4>Total Events</h4><div class="num" id="adminEvents">0</div></div></div>
+          <div class="stat-card"><div class="icon" style="background:var(--teal);">✅</div><div class="info"><h4>Active</h4><div class="num" id="adminActive">0</div></div></div>
+          <div class="stat-card"><div class="icon" style="background:var(--coral);">📊</div><div class="info"><h4>Registrations</h4><div class="num" id="adminRegistrations">0</div></div></div>
+        </div>
+        <!-- User table -->
+        <div style="margin-top:32px;">
+          <h3>Registered Users</h3>
+          <div class="table-wrap"><table><thead><tr><th>Name</th><th>Reg No</th><th>Email</th><th>Dept</th><th>Year</th><th>Phone</th><th>Role</th></tr></thead><tbody id="adminUserTable"></tbody></table></div>
+        </div>
+        <div style="margin-top:40px;">
+          <h3>All Events</h3>
+          <div id="adminEventList" style="margin-top:16px;"></div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- ===== FOOTER ===== -->
+  <footer><div class="wrap"><div class="footer-top"><div class="footer-brand"><a href="#" class="logo"><span class="dot"></span>Campus Connect</a><p>The board where every fest, match and workshop on campus gets pinned.</p></div><div class="footer-col"><h5>Explore</h5><a href="#events">Upcoming events</a><a href="#">Categories</a></div><div class="footer-col"><h5>Company</h5><a href="#">About us</a><a href="#contact">Contact</a></div><div class="footer-col"><h5>Stay in the loop</h5><input type="email" placeholder="you@college.edu" /><button class="btn" style="width:100%; justify-content:center; padding:11px;">Subscribe</button></div></div><div class="footer-bottom"><p>© 2026 Campus Connect. Made on campus.</p><div class="socials"><a href="#"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#F3EEE1" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1"/></svg></a></div></div></div></footer>
+
+  <script>
+    // ================================================================
+    // DATA STORE with localStorage
+    // ================================================================
+    let DB = { users: [], events: [], registrations: [] };
+    let currentUser = null;
+    let currentFilter = 'All';
+    let nextId = { user: 1, event: 1, registration: 1 };
+
+    function loadData() {
+      const saved = localStorage.getItem('campusDB_v2');
+      if (saved) {
+        try {
+          const parsed = JSON.parse(saved);
+          DB.users = parsed.users || [];
+          DB.events = parsed.events || [];
+          DB.registrations = parsed.registrations || [];
+          nextId = parsed.nextId || { user: 1, event: 1, registration: 1 };
+          // ensure all events have status
+          DB.events.forEach(e => { if (!e.status) e.status = 'approved'; });
+          return;
+        } catch (e) { console.warn('Invalid data, resetting'); }
+      }
+      // No default events — only admins create events.
+      DB.users = [];
+      DB.events = [];
+      DB.registrations = [];
+      nextId = { user: 1, event: 1, registration: 1 };
+      // Create a default admin for convenience
+      const admin = {
+        id: nextId.user++,
+        name: 'Admin User',
+        email: 'admin@campus.edu',
+        password: 'admin123',
+        role: 'admin',
+        regNumber: 'ADMIN001',
+        department: 'Administration',
+        year: 0,
+        phone: '+91 99999 99999',
+        registeredAt: new Date().toISOString()
+      };
+      DB.users.push(admin);
+      saveData();
+    }
+
+    function saveData() {
+      localStorage.setItem('campusDB_v2', JSON.stringify({
+        users: DB.users,
+        events: DB.events,
+        registrations: DB.registrations,
+        nextId: nextId
+      }));
+    }
+
+    function findUserByRegNo(regNo) {
+      return DB.users.find(u => u.regNumber && u.regNumber.toLowerCase() === regNo.toLowerCase());
+    }
+
+    function findUserByEmail(email) {
+      return DB.users.find(u => u.email.toLowerCase() === email.toLowerCase());
+    }
+
+    function getEvent(id) { return DB.events.find(e => e.id === id); }
+
+    function getRegistrationsForUser(userId) {
+      return DB.registrations.filter(r => r.userId === userId);
+    }
+
+    function isRegistered(userId, eventId) {
+      return DB.registrations.some(r => r.userId === userId && r.eventId === eventId);
+    }
+
+    // ================================================================
+    // AUTH
+    // ================================================================
+    function handleLogin(e) {
+      e.preventDefault();
+      const regNo = document.getElementById('loginRegNo').value.trim();
+      const roleBtn = document.querySelector('#loginRoleTabs .role-btn.active');
+      const role = roleBtn ? roleBtn.dataset.role : 'student';
+
+      const user = findUserByRegNo(regNo);
+      if (!user) {
+        alert('❌ No account found with this Register Number. Please register first.');
+        return;
+      }
+      if (user.role !== role) {
+        alert('❌ This account is registered as ' + user.role + '. Please select the correct role.');
+        return;
+      }
+
+      currentUser = user;
+      updateUI();
+      closeLogin();
+      alert('✅ Welcome ' + user.name + '!');
+      showPage('home');
+    }
+
+    function handleRegister(e) {
+      e.preventDefault();
+      const name = document.getElementById('regName').value.trim();
+      const regNumber = document.getElementById('regNumber').value.trim();
+      const dept = document.getElementById('regDept').value;
+      const year = document.getElementById('regYear').value;
+      const email = document.getElementById('regEmail').value.trim();
+      const phone = document.getElementById('regPhone').value.trim();
+      const password = document.getElementById('regPassword').value.trim();
+      const confirm = document.getElementById('regConfirm').value.trim();
+
+      if (!name || !regNumber || !dept || !year || !email || !phone || !password || !confirm) {
+        alert('⚠️ Please fill in all fields.');
+        return;
+      }
+      if (!email.includes('@')) { alert('⚠️ Valid email required.'); return; }
+      if (password.length < 8) { alert('⚠️ Password must be at least 8 characters.'); return; }
+      if (password !== confirm) { alert('⚠️ Passwords do not match.'); return; }
+      if (findUserByRegNo(regNumber)) { alert('⚠️ Register Number already taken.'); return; }
+      if (findUserByEmail(email)) { alert('⚠️ Email already registered.'); return; }
+
+      const newUser = {
+        id: nextId.user++,
+        name,
+        email,
+        password,
+        role: 'student',
+        regNumber: regNumber,
+        department: dept,
+        year: parseInt(year),
+        phone: phone,
+        registeredAt: new Date().toISOString()
+      };
+      DB.users.push(newUser);
+      saveData();
+      currentUser = newUser;
+      updateUI();
+      closeRegister();
+      alert('🎉 Welcome ' + name + '! Your account has been created.');
+      showPage('home');
+    }
+
+    function logout() {
+      currentUser = null;
+      updateUI();
+      showPage('home');
+    }
+
+    function openLogin() { document.getElementById('loginOverlay').classList.add('open'); }
+
+    function closeLogin() { document.getElementById('loginOverlay').classList.remove('open'); }
+
+    function openRegister() { document.getElementById('registerOverlay').classList.add('open'); }
+
+    function closeRegister() { document.getElementById('registerOverlay').classList.remove('open'); }
+
+    // ================================================================
+    // ADMIN — Create Event
+    // ================================================================
+    function openAdminCreateEvent() {
+      if (!currentUser || currentUser.role !== 'admin') { alert('Admin access required'); return; }
+      document.getElementById('adminCreateEventOverlay').classList.add('open');
+    }
+
+    function closeAdminCreateEvent() {
+      document.getElementById('adminCreateEventOverlay').classList.remove('open');
+    }
+
+    function handleAdminCreateEvent(e) {
+      e.preventDefault();
+      const name = document.getElementById('aevName').value.trim();
+      const category = document.getElementById('aevCategory').value;
+      const date = document.getElementById('aevDate').value;
+      const time = document.getElementById('aevTime').value;
+      const venue = document.getElementById('aevVenue').value.trim();
+      const desc = document.getElementById('aevDesc').value.trim();
+      const limit = parseInt(document.getElementById('aevLimit').value) || 100;
+      const deadline = document.getElementById('aevDeadline').value;
+
+      if (!name || !category || !date || !time || !venue || !deadline) {
+        alert('⚠️ Please fill in all required fields.');
+        return;
+      }
+
+      const newEvent = {
+        id: nextId.event++,
+        name,
+        category,
+        date,
+        time,
+        venue,
+        description: desc,
+        limit: limit,
+        fee: 0, // all events are free
+        deadline: deadline,
+        organizerId: currentUser.id,
+        status: 'approved',
+        registrations: 0
+      };
+      DB.events.push(newEvent);
+      saveData();
+      closeAdminCreateEvent();
+      alert('✅ Event created successfully!');
+      renderAll();
+    }
+
+    // ================================================================
+    // REGISTER for event
+    // ================================================================
+    function registerForEvent(eventId) {
+      if (!currentUser) { alert('⚠️ Please login first.'); return; }
+      if (currentUser.role !== 'student') { alert('⚠️ Only students can register.'); return; }
+
+      const event = getEvent(eventId);
+      if (!event) { alert('❌ Event not found.'); return; }
+      if (event.registrations >= event.limit) { alert('❌ Event is full!'); return; }
+      if (isRegistered(currentUser.id, eventId)) { alert('⚠️ Already registered.'); return; }
+
+      // Check deadline
+      if (event.deadline && new Date(event.deadline) < new Date()) {
+        alert('❌ Registration deadline has passed.');
+        return;
+      }
+
+      const reg = {
+        id: nextId.registration++,
+        eventId: eventId,
+        userId: currentUser.id,
+        status: 'confirmed',
+        qrCode: 'QR-' + String(eventId).padStart(3, '0') + String(currentUser.id).padStart(3, '0'),
+        paymentStatus: 'paid', // all events are free
+        registeredAt: new Date().toISOString()
+      };
+      DB.registrations.push(reg);
+      event.registrations++;
+      saveData();
+      alert('✅ Registered successfully!');
+      renderAll();
+    }
+
+    function cancelRegistration(regId) {
+      if (!confirm('Cancel your registration?')) return;
+      const reg = DB.registrations.find(r => r.id === regId);
+      if (!reg) return;
+      const event = getEvent(reg.eventId);
+      if (event) event.registrations--;
+      DB.registrations = DB.registrations.filter(r => r.id !== regId);
+      saveData();
+      alert('✅ Registration cancelled.');
+      renderAll();
+    }
+
+    // ================================================================
+    // ADMIN — delete event
+    // ================================================================
+    function deleteEvent(eventId) {
+      if (!currentUser || currentUser.role !== 'admin') { alert('Admin access required'); return; }
+      if (!confirm('Delete this event and all its registrations?')) return;
+      DB.events = DB.events.filter(e => e.id !== eventId);
+      DB.registrations = DB.registrations.filter(r => r.eventId !== eventId);
+      saveData();
+      renderAll();
+    }
+
+    // ================================================================
+    // RENDER
+    // ================================================================
+    function renderEventCards(containerId, events, showRegister = true, showCancel = false) {
+      const container = document.getElementById(containerId);
+      if (!container) return;
+      if (!events || events.length === 0) {
+        container.innerHTML = '<p class="text-muted" style="grid-column:1/-1;text-align:center;padding:40px 0;">No events found.</p>';
+        return;
+      }
+      container.innerHTML = events.map(e => {
+        const isFull = e.registrations >= e.limit;
+        const already = currentUser ? isRegistered(currentUser.id, e.id) : false;
+        const pastDeadline = e.deadline && new Date(e.deadline) < new Date();
+        let btnHtml = '';
+        if (showRegister) {
+          if (already) {
+            btnHtml = `<button class="btn small green" disabled>✅ Registered</button>`;
+          } else if (isFull) {
+            btnHtml = `<button class="btn small" disabled>Full</button>`;
+          } else if (pastDeadline) {
+            btnHtml = `<button class="btn small" disabled>Deadline Passed</button>`;
+          } else {
+            btnHtml = `<button class="btn small teal" onclick="registerForEvent(${e.id})">Register</button>`;
+          }
+        }
+        const month = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'][parseInt(e.date.split('-')[1]) - 1] || '';
+        return `
+          <div class="ticket reveal">
+            <div class="ticket-main">
+              <span class="ticket-tag tag-${e.category.toLowerCase()}">${e.category}</span>
+              <h4>${e.name}</h4>
+              <span class="loc">${e.venue}</span>
+              <span class="text-muted text-small">${e.date} · ${e.time}</span>
+              <span class="text-muted text-small">${e.registrations}/${e.limit} registered</span>
+              ${e.deadline ? `<span class="text-muted text-small">Deadline: ${e.deadline}</span>` : ''}
+              ${btnHtml}
+              ${currentUser && currentUser.role === 'admin' ? `<button class="btn small coral" style="margin-top:6px;" onclick="deleteEvent(${e.id})">Delete</button>` : ''}
+              ${showCancel && already ? `<button class="btn small coral" style="margin-top:6px;" onclick="cancelRegistration(${DB.registrations.find(r => r.eventId === e.id && r.userId === currentUser.id)?.id})">Cancel</button>` : ''}
+            </div>
+            <div class="ticket-stub">
+              <span class="day">${e.date.split('-')[2]}</span>
+              <span class="mon">${month}</span>
+              <span class="time">${e.time}</span>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function renderAll() {
+      const allApproved = DB.events.filter(e => e.status === 'approved');
+      let filtered = allApproved;
+      if (currentFilter !== 'All') filtered = filtered.filter(e => e.category === currentFilter);
+
+      renderEventCards('homeEventGrid', filtered.slice(0, 9), true);
+      renderEventCards('browseEventGrid', filtered, true);
+
+      document.getElementById('totalEventsStat').textContent = allApproved.length;
+      document.getElementById('totalStudentsStat').textContent = DB.users.filter(u => u.role === 'student').length;
+
+      // My events
+      if (currentUser) {
+        const myRegs = getRegistrationsForUser(currentUser.id);
+        const myEvents = myRegs.map(r => getEvent(r.eventId)).filter(Boolean);
+        renderEventCards('myEventsList', myEvents, false, true);
+
+        // Dashboard
+        const upcoming = myRegs.filter(r => {
+          const ev = getEvent(r.eventId);
+          return ev && new Date(ev.date) >= new Date();
+        });
+        document.getElementById('dashRegistered').textContent = myRegs.length;
+        document.getElementById('dashUpcoming').textContent = upcoming.length;
+        document.getElementById('dashCertificates').textContent = myRegs.filter(r => r.status === 'completed').length;
+        document.getElementById('dashNotifications').textContent = 0;
+
+        const dashList = document.getElementById('dashEventList');
+        if (dashList) {
+          dashList.innerHTML = myRegs.slice(0, 5).map(r => {
+            const ev = getEvent(r.eventId);
+            return ev ? `<div class="text-small" style="padding:4px 0; border-bottom:1px solid var(--line);">✅ ${ev.name} (${ev.date})</div>` : '';
+          }).join('') || '<p class="text-muted">No events registered.</p>';
+        }
+
+        // Admin
+        if (currentUser.role === 'admin') {
+          const students = DB.users.filter(u => u.role === 'student');
+          const allEvents = DB.events;
+          document.getElementById('adminStudents').textContent = students.length;
+          document.getElementById('adminEvents').textContent = allEvents.length;
+          document.getElementById('adminActive').textContent = allEvents.filter(e => e.status === 'approved').length;
+          document.getElementById('adminRegistrations').textContent = DB.registrations.length;
+
+          const tbody = document.getElementById('adminUserTable');
+          if (tbody) {
+            tbody.innerHTML = DB.users.map(u => `
+              <tr><td>${u.name}</td><td>${u.regNumber || '-'}</td><td>${u.email}</td><td>${u.department || '-'}</td><td>${u.year || '-'}</td><td>${u.phone || '-'}</td><td>${u.role}</td></tr>
+            `).join('');
+          }
+
+          const adminList = document.getElementById('adminEventList');
+          if (adminList) {
+            adminList.innerHTML = DB.events.map(e => `
+              <div style="padding:10px 0; border-bottom:1px solid var(--line); display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
+                <div><strong>${e.name}</strong> <span class="badge badge-${e.category === 'Technical' ? 'yellow' : e.category === 'Cultural' ? 'red' : e.category === 'Sports' ? 'green' : 'purple'}">${e.category}</span></div>
+                <div style="display:flex; gap:8px;">
+                  <span class="text-muted text-small">${e.registrations}/${e.limit}</span>
+                  <button class="btn small coral" onclick="deleteEvent(${e.id})">Delete</button>
+                </div>
+              </div>
+            `).join('');
+          }
+        }
+      }
+
+      updateProfileUI();
+    }
+
+    function updateProfileUI() {
+      const section = document.getElementById('profileSection');
+      if (currentUser) {
+        section.style.display = 'block';
+        document.getElementById('profileName').textContent = currentUser.name;
+        document.getElementById('profileRegNo').textContent = currentUser.regNumber || '-';
+        document.getElementById('profileEmail').textContent = currentUser.email;
+        document.getElementById('profileDept').textContent = currentUser.department || '-';
+        document.getElementById('profileYear').textContent = currentUser.year ? currentUser.year + 'rd Year' : '-';
+        document.getElementById('profilePhone').textContent = currentUser.phone || '-';
+        const myRegs = getRegistrationsForUser(currentUser.id);
+        document.getElementById('profileRegCount').textContent = myRegs.length;
+        const upcoming = myRegs.filter(r => {
+          const ev = getEvent(r.eventId);
+          return ev && new Date(ev.date) >= new Date();
+        });
+        document.getElementById('profileUpcomingCount').textContent = upcoming.length;
+        document.getElementById('profileRole').textContent = currentUser.role.toUpperCase();
+      } else {
+        section.style.display = 'none';
+      }
+    }
+
+    // ================================================================
+    // FILTER & SEARCH
+    // ================================================================
+    function filterEvents(filter) {
+      currentFilter = filter;
+      document.querySelectorAll('.filter-row .chip').forEach(c => c.classList.toggle('active', c.dataset.filter === filter));
+      renderAll();
+    }
+
+    function searchEvents() {
+      const query = document.getElementById('homeSearch').value.trim().toLowerCase();
+      if (!query) { renderAll(); return; }
+      const allApproved = DB.events.filter(e => e.status === 'approved');
+      const results = allApproved.filter(e =>
+        e.name.toLowerCase().includes(query) ||
+        e.venue.toLowerCase().includes(query) ||
+        e.category.toLowerCase().includes(query)
+      );
+      document.getElementById('events').scrollIntoView({ behavior: 'smooth' });
+      const grid = document.getElementById('homeEventGrid');
+      if (results.length === 0) {
+        grid.innerHTML = `<p class="text-muted" style="grid-column:1/-1;text-align:center;padding:40px 0;">No events found for "${query}".</p>`;
+        return;
+      }
+      renderEventCards('homeEventGrid', results, true);
+    }
+
+    // ================================================================
+    // UI HELPERS
+    // ================================================================
+    function updateUI() {
+      const loginBtn = document.getElementById('loginBtn');
+      const registerBtn = document.getElementById('registerBtn');
+      const logoutBtn = document.getElementById('logoutBtn');
+      const userBadge = document.getElementById('userBadge');
+      const userName = document.getElementById('userName');
+
+      if (currentUser) {
+        loginBtn.style.display = 'none';
+        registerBtn.style.display = 'none';
+        logoutBtn.style.display = 'inline-flex';
+        userBadge.style.display = 'flex';
+        userName.textContent = currentUser.name;
+      } else {
+        loginBtn.style.display = 'inline-flex';
+        registerBtn.style.display = 'inline-flex';
+        logoutBtn.style.display = 'none';
+        userBadge.style.display = 'none';
+      }
+
+      document.querySelectorAll('.nav-links a').forEach(link => {
+        const page = link.dataset.page;
+        let show = false;
+        if (!currentUser) {
+          show = (page === 'home' || page === 'browse');
+        } else if (currentUser.role === 'student') {
+          show = (page === 'home' || page === 'browse' || page === 'dashboard' || page === 'myevents');
+        } else if (currentUser.role === 'admin') {
+          show = (page === 'home' || page === 'browse' || page === 'admin');
+        }
+        link.style.display = show ? '' : 'none';
+      });
+
+      renderAll();
+    }
+
+    function showPage(pageId) {
+      document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+      const page = document.getElementById('page-' + pageId);
+      if (page) page.classList.add('active');
+      document.querySelectorAll('.nav-links a').forEach(a => a.classList.toggle('active', a.dataset.page === pageId));
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      renderAll();
+    }
+
+    function toggleMenu() {
+      const links = document.getElementById('navLinks');
+      links.style.display = links.style.display === 'flex' ? 'none' : 'flex';
+    }
+
+    // Nav clicks
+    document.querySelectorAll('.nav-links a').forEach(link => {
+      link.addEventListener('click', function(e) {
+        e.preventDefault();
+        const page = this.dataset.page;
+        if (!currentUser && (page === 'dashboard' || page === 'myevents' || page === 'admin')) {
+          alert('⚠️ Please login first.');
+          return;
+        }
+        if (currentUser) {
+          if (page === 'admin' && currentUser.role !== 'admin') { alert('⚠️ Admin access only.'); return; }
+          if ((page === 'dashboard' || page === 'myevents') && currentUser.role !== 'student') { alert('⚠️ Student access only.'); return; }
+        }
+        showPage(page);
+      });
+    });
+
+    // Overlay close on backdrop
+    document.querySelectorAll('.overlay').forEach(overlay => {
+      overlay.addEventListener('click', function(e) { if (e.target === this) this.classList.remove('open'); });
+    });
+
+    // Role tabs
+    document.querySelectorAll('#loginRoleTabs .role-btn').forEach(btn => {
+      btn.addEventListener('click', function() {
+        document.querySelectorAll('#loginRoleTabs .role-btn').forEach(b => b.classList.remove('active'));
+        this.classList.add('active');
+      });
+    });
+
+    // Password match
+    document.getElementById('regPassword')?.addEventListener('input', checkPasswordMatch);
+    document.getElementById('regConfirm')?.addEventListener('input', checkPasswordMatch);
+
+    function checkPasswordMatch() {
+      const pwd = document.getElementById('regPassword')?.value || '';
+      const confirm = document.getElementById('regConfirm')?.value || '';
+      const field = document.getElementById('regConfirm');
+      if (field) {
+        if (confirm.length === 0) { field.style.borderColor = 'rgba(27,27,31,.25)'; return; }
+        field.style.borderColor = pwd === confirm ? '#0E5257' : '#FF5A5F';
+      }
+    }
+
+    // IntersectionObserver
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach(entry => { if (entry.isIntersecting) entry.target.classList.add('in'); });
+    }, { threshold: 0.12 });
+    document.querySelectorAll('.reveal-on-scroll').forEach(el => io.observe(el));
+
+    // ================================================================
+    // INIT
+    // ================================================================
+    loadData();
+    updateUI();
+    showPage('home');
+  </script>
+</body>
+</html>
