@@ -1,0 +1,667 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.5, user-scalable=yes" />
+    <title>Campus Connect — Event Management System</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
+    <!-- External stylesheet -->
+    <link rel="stylesheet" href="/static/css/style.css" />
+    <!-- Chart.js CDN for Analytics -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+    <!-- ===== NAVBAR ===== -->
+    <header class="nav">
+        <div class="nav-inner">
+            <a href="#" class="logo" onclick="showPage('home')"><span class="dot"></span>Campus Connect</a>
+            <nav class="nav-links" id="navLinks">
+                <a class="active" data-page="home">Home</a>
+                <a data-page="browse">Browse Events</a>
+                <a data-page="calendar" style="display:none;">Calendar</a>
+                <a data-page="clubs" style="display:none;">Clubs</a>
+                <a data-page="dashboard" style="display:none;">Dashboard</a>
+                <a data-page="myevents" style="display:none;">My Events</a>
+                <a data-page="admin" style="display:none;">Admin</a>
+            </nav>
+            <div class="nav-cta">
+                <button class="theme-toggle" id="themeToggleBtn" onclick="toggleTheme()" title="Toggle theme" style="margin-right: 6px;">🌙</button>
+                <!-- Notification Bell -->
+                <div id="notifContainer" class="notif-container" style="display:none;">
+                    <button class="nav-bell" onclick="toggleNotifPanel(event)">🔔<span id="notifBadge" class="badge-count" style="display:none;">0</span></button>
+                    <div id="notifPanel" class="notif-panel">
+                        <div class="notif-header">
+                            <h4>Notifications</h4>
+                            <button class="notif-clear-btn" onclick="clearNotifications()">Clear All</button>
+                        </div>
+                        <div id="notifList" class="notif-list">
+                            <!-- Dynamically populated -->
+                        </div>
+                    </div>
+                </div>
+                <span id="userBadge" class="user-badge" style="display:none; cursor:pointer;" onclick="openIdCard()">👤 <span id="userName">User</span></span>
+                <a href="#" class="btn ghost small" id="loginBtn" onclick="openLogin()">Log In</a>
+                <a href="#" class="btn small" id="registerBtn" onclick="openRegister()">Register</a>
+                <a href="#" class="btn small" style="display:none; background:var(--coral); border-color:var(--coral);" id="logoutBtn" onclick="logout()">Logout</a>
+                <button class="burger" aria-label="Menu" onclick="toggleMenu()"><span></span><span></span><span></span></button>
+            </div>
+        </div>
+    </header>
+
+    <!-- ===== ANNOUNCEMENT BANNER ===== -->
+    <div class="announce-bar" id="announceBar" style="display:none;">
+        <span id="announceText">📢 Welcome to Campus Connect! Check out the upcoming Hackathon.</span>
+        <button onclick="dismissAnnouncement()" title="Dismiss" style="margin-left: 10px; cursor: pointer;">✕</button>
+    </div>
+
+    <!-- ===== LOGIN OVERLAY ===== -->
+    <div class="overlay" id="loginOverlay">
+        <div class="overlay-card">
+            <button class="overlay-close" onclick="closeLogin()">✕</button>
+            <div class="brand"><span class="dot"></span><h1>Campus Connect</h1></div>
+            <span class="eyebrow">sign in · with student ID</span>
+            <div class="role-tabs" id="loginRoleTabs">
+                <button class="role-btn active" data-role="student">🎓 Student</button>
+                <button class="role-btn" data-role="admin">⚡ Admin</button>
+            </div>
+            <!-- Admin hint -->
+           
+            <form onsubmit="handleLogin(event)">
+                <div class="input-group">
+                    <label>Register Number / Student ID</label>
+                    <input id="loginRegNo" type="text" required />
+                </div>
+                <div class="flex-row">
+                    <label class="remember"><input type="checkbox" checked> Remember me</label>
+                </div>
+                <button class="btn" style="width:100%; justify-content:center;" type="submit">Log in →</button>
+            </form>
+            <div class="text-center mt-2 text-muted text-small">Don't have an account? <a href="#" onclick="closeLogin();openRegister()" style="font-weight:700;border-bottom:2px solid var(--coral);">Register</a></div>
+        </div>
+    </div>
+
+    <!-- ===== REGISTER OVERLAY ===== -->
+    <div class="overlay" id="registerOverlay">
+        <div class="overlay-card" style="max-width:560px;">
+            <button class="overlay-close" onclick="closeRegister()">✕</button>
+            <div class="brand"><span class="dot"></span><h1>Campus Connect</h1></div>
+            <span class="eyebrow">create account · join the board</span>
+            <form onsubmit="handleRegister(event)">
+                <div class="grid-2" style="gap:1rem;">
+                    <div class="input-group" style="grid-column:1/-1;"><label>Full Name</label><input id="regName" type="text" placeholder="e.g. Priya Menon" required /></div>
+                    <div class="input-group"><label>Register Number</label><input id="regNumber" type="text" placeholder="12-digit register number" required pattern="\d{12}" title="Register number must be exactly 12 digits" /></div>
+                    <div class="input-group">
+                        <label>Department</label>
+                        <select id="regDept" required>
+                            <option value="">Select</option>
+                            <option value="Computer Science">Computer Science</option>
+                            <option value="Information Technology">Information Technology</option>
+                            <option value="Food Technology">Food Technology</option>
+                            <option value="Civil">Civil</option>
+                            <option value="AIML">AIML</option>
+                            <option value="Agricultural Engineering">Agricultural Engineering</option>
+                            <option value="Cybersecurity">Cybersecurity</option>
+                        </select>
+                    </div>
+                    <div class="input-group">
+                        <label>Year</label>
+                        <select id="regYear" required>
+                            <option value="">Select</option>
+                            <option value="1">1st Year</option>
+                            <option value="2">2nd Year</option>
+                            <option value="3">3rd Year</option>
+                            <option value="4">4th Year</option>
+                        </select>
+                    </div>
+                    <div class="input-group" style="grid-column:1/-1;"><label>Email</label><input id="regEmail" type="email" placeholder="you@college.edu" required /></div>
+                    <div class="input-group" style="grid-column:1/-1;"><label>Phone</label><input id="regPhone" type="tel" placeholder="10-digit phone number" required pattern="\d{10}" title="Phone number must be exactly 10 digits" /></div>
+                    <div class="input-group"><label>Password</label><input id="regPassword" type="password" placeholder="••••••••" required /></div>
+                    <div class="input-group"><label>Confirm Password</label><input id="regConfirm" type="password" placeholder="••••••••" required /></div>
+                </div>
+                <button class="btn" style="width:100%; justify-content:center; margin-top:0.5rem;" type="submit">Create account →</button>
+            </form>
+            <div class="text-center mt-2 text-muted text-small">Already have an account? <a href="#" onclick="closeRegister();openLogin()" style="font-weight:700;border-bottom:2px solid var(--coral);">Log in</a></div>
+        </div>
+    </div>
+
+    <!-- ===== ADMIN CREATE EVENT OVERLAY ===== -->
+    <div class="overlay" id="adminCreateEventOverlay">
+        <div class="overlay-card" style="max-width:600px;">
+            <button class="overlay-close" onclick="closeAdminCreateEvent()">✕</button>
+            <div class="brand"><span class="dot"></span><h1>Add Event</h1></div>
+            <form onsubmit="handleAdminCreateEvent(event)">
+                <div class="input-group"><label>Event Name</label><input id="aevName" type="text" placeholder="e.g. CodeStorm Hackathon" required /></div>
+                <div class="input-group"><label>Category</label>
+                    <select id="aevCategory" required>
+                        <option value="">Select</option>
+                        <option value="Technical">Technical</option>
+                        <option value="Cultural">Cultural</option>
+                        <option value="Sports">Sports</option>
+                        <option value="Workshops">Workshops</option>
+                    </select>
+                </div>
+                <div class="grid-2">
+                    <div class="input-group"><label>Date</label><input id="aevDate" type="date" required /></div>
+                    <div class="input-group"><label>Time</label><input id="aevTime" type="time" required /></div>
+                </div>
+                <div class="input-group"><label>Venue</label><input id="aevVenue" type="text" placeholder="e.g. Innovation Hub" required /></div>
+                <div class="input-group"><label>Description</label><textarea id="aevDesc" placeholder="Describe your event..." rows="3"></textarea></div>
+                <div class="grid-2">
+                    <div class="input-group"><label>Registration Limit</label><input id="aevLimit" type="number" placeholder="100" value="100" required /></div>
+                    <div class="input-group"><label>Registration Deadline</label><input id="aevDeadline" type="date" required /></div>
+                </div>
+                <div class="input-group">
+                    <label>Event Brochure (PDF or Image)</label>
+                    <input id="aevBrochure" type="file" accept=".pdf,image/*" style="border: 2px dashed var(--ink); padding: 10px;" />
+                </div>
+                <button class="btn" style="width:100%; justify-content:center; margin-top:0.5rem;" type="submit">Create Event →</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- ===== PAGE: HOME ===== -->
+    <div class="page active" id="page-home">
+        <section class="hero">
+            <div class="wrap hero-grid">
+                <div>
+                    <span class="eyebrow">Live on campus — Aug 2026</span>
+                    <h1 class="display">Every campus<br />moment, <span class="accent">one board.</span></h1>
+                    <p class="lead">Fests, hackathons, matches, and workshops — all pinned to a single board.</p>
+                    <div class="search-wrap">
+                        <div class="search-panel">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                            <input id="homeSearch" type="text" placeholder="Search events, clubs, venues…" />
+                            <button class="mic-btn" id="micBtn" onclick="toggleVoiceSearch()" title="Voice search" type="button" style="margin-right: 8px;">🎤</button>
+                            <button onclick="searchEvents()">Search</button>
+                        </div>
+                    </div>
+                    <div class="stats-row">
+                        <div class="stat"><b id="totalEventsStat">0</b><span>Events this semester</span></div>
+                        <div class="stat"><b>38</b><span>Colleges connected</span></div>
+                        <div class="stat"><b id="totalStudentsStat">0</b><span>Students joined</span></div>
+                    </div>
+                </div>
+                <div class="hero-board">
+                    <div class="pin-card pc-1"><div class="washi"></div><span class="tag" style="color:var(--ink);">Technical</span><h4>CodeStorm Hackathon</h4><div class="meta">Aug 02 · Innovation Hub</div></div>
+                    <div class="pin-card pc-2"><div class="washi"></div><span class="tag">Cultural</span><h4>Vaibhav Fest</h4><div class="meta">Aug 05 · Open Air Theatre</div></div>
+                    <div class="pin-card pc-3"><div class="washi"></div><span class="tag">Sports</span><h4>Inter-College Football Cup</h4><div class="meta">Aug 08 · Main Ground</div></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Profile Section (shown after login) -->
+        <section id="profileSection" style="display:none; padding:0 0 36px;">
+            <div class="wrap">
+                <div class="profile-card">
+                    <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:12px;">
+                        <h2 style="font-size:24px;">👋 Welcome, <span id="profileName"></span></h2>
+                        <span class="badge badge-green" id="profileRole"></span>
+                    </div>
+                    <div class="profile-grid" style="margin-top:14px;">
+                        <div class="profile-item"><label>Register Number</label><span id="profileRegNo"></span></div>
+                        <div class="profile-item"><label>Email</label><span id="profileEmail"></span></div>
+                        <div class="profile-item"><label>Department</label><span id="profileDept"></span></div>
+                        <div class="profile-item"><label>Year</label><span id="profileYear"></span></div>
+                        <div class="profile-item"><label>Phone</label><span id="profilePhone"></span></div>
+                        <div class="profile-item"><label>Registered Events</label><span id="profileRegCount">0</span></div>
+                        <div class="profile-item"><label>Upcoming Events</label><span id="profileUpcomingCount">0</span></div>
+                    </div>
+                    <div class="profile-actions">
+                        <button class="btn small teal" onclick="showPage('browse')">Browse Events</button>
+                        <button class="btn small marigold" onclick="showPage('myevents')">My Events</button>
+                        <button class="btn small coral" onclick="logout()">Logout</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="events" id="events">
+            <div class="wrap">
+                <div class="sec-head"><div><span class="eyebrow">Coming up next</span><h2>Featured events</h2></div><p>All events are free. Tap to register.</p></div>
+                <div class="filter-row">
+                    <button class="chip active" data-filter="All"       onclick="filterEvents('All')">All</button>
+                    <button class="chip"        data-filter="Technical" onclick="filterEvents('Technical')">Technical</button>
+                    <button class="chip"        data-filter="Cultural"  onclick="filterEvents('Cultural')">Cultural</button>
+                    <button class="chip"        data-filter="Sports"    onclick="filterEvents('Sports')">Sports</button>
+                    <button class="chip"        data-filter="Workshops" onclick="filterEvents('Workshops')">Workshops</button>
+                </div>
+                <div class="event-grid" id="homeEventGrid"></div>
+            </div>
+        </section>
+
+        <section class="contact">
+            <div class="wrap">
+                <div class="contact-panel">
+                    <div>
+                        <span class="eyebrow">Get in touch</span>
+                        <h2 class="display" style="text-transform:none;">Questions, or want<br />to list an event?</h2>
+                        <p class="lead">Reach the Campus Connect team directly.</p>
+                    </div>
+                    <form onsubmit="event.preventDefault(); this.querySelector('.btn').textContent='Sent ✓';">
+                        <div class="form-row">
+                            <div class="form-group"><label>Name</label><input type="text" placeholder="Your full name" required /></div>
+                            <div class="form-group"><label>Email</label><input type="email" placeholder="you@college.edu" required /></div>
+                        </div>
+                        <div class="form-group"><label>Subject</label><input type="text" placeholder="What's this about?" /></div>
+                        <div class="form-group"><label>Message</label><textarea placeholder="Tell us a bit more…" required></textarea></div>
+                        <button class="btn" type="submit">Send message</button>
+                    </form>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- ===== PAGE: BROWSE ===== -->
+    <div class="page" id="page-browse">
+        <section style="padding:80px 0 30px;">
+            <div class="wrap">
+                <div class="sec-head"><div><span class="eyebrow">Discover</span><h2>Browse All Events</h2></div></div>
+                <div class="filter-row">
+                    <button class="chip active" data-filter="All"       onclick="filterEvents('All')">All</button>
+                    <button class="chip"        data-filter="Technical" onclick="filterEvents('Technical')">Technical</button>
+                    <button class="chip"        data-filter="Cultural"  onclick="filterEvents('Cultural')">Cultural</button>
+                    <button class="chip"        data-filter="Sports"    onclick="filterEvents('Sports')">Sports</button>
+                    <button class="chip"        data-filter="Workshops" onclick="filterEvents('Workshops')">Workshops</button>
+                </div>
+                <div class="event-grid" id="browseEventGrid"></div>
+            </div>
+        </section>
+    </div>
+
+    <!-- ===== PAGE: CALENDAR ===== -->
+    <div class="page" id="page-calendar">
+        <section style="padding:80px 0 30px;">
+            <div class="wrap">
+                <div class="sec-head">
+                    <div>
+                        <span class="eyebrow">Schedule</span>
+                        <h2>Event Calendar</h2>
+                    </div>
+                </div>
+                <div class="cal-head">
+                    <button class="btn small" onclick="changeCalendarMonth(-1)">← Prev</button>
+                    <h3 id="calendarMonthLabel" class="display" style="font-size:22px;">August 2026</h3>
+                    <button class="btn small" onclick="changeCalendarMonth(1)">Next →</button>
+                </div>
+                <div class="cal-grid" id="calendarGridHeader" style="margin-bottom:6px;">
+                    <div class="cal-dow">Sun</div>
+                    <div class="cal-dow">Mon</div>
+                    <div class="cal-dow">Tue</div>
+                    <div class="cal-dow">Wed</div>
+                    <div class="cal-dow">Thu</div>
+                    <div class="cal-dow">Fri</div>
+                    <div class="cal-dow">Sat</div>
+                </div>
+                <div class="cal-grid" id="calendarGridDays">
+                    <!-- Populated dynamically -->
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- ===== PAGE: CLUBS ===== -->
+    <div class="page" id="page-clubs">
+        <section style="padding:80px 0 30px;">
+            <div class="wrap">
+                <div class="sec-head">
+                    <div>
+                        <span class="eyebrow">Clubs</span>
+                        <h2>Campus Clubs & Chapters</h2>
+                    </div>
+                    <p>Join clubs to get updates and points.</p>
+                </div>
+                <div class="clubs-grid" id="clubsGrid">
+                    <!-- Populated dynamically -->
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- ===== PAGE: DASHBOARD (student) ===== -->
+    <div class="page" id="page-dashboard">
+        <section style="padding:80px 0 30px;">
+            <div class="wrap">
+                <div class="sec-head">
+                    <div>
+                        <span class="eyebrow">Student Portal</span>
+                        <h2>Student Dashboard</h2>
+                    </div>
+                </div>
+                
+                <!-- Dashboard Tab row -->
+                <div class="dashboard-tabs">
+                    <button class="tab-btn active" id="tabBtn-overview" onclick="switchDashboardTab('overview')">📊 Overview</button>
+                    <button class="tab-btn" id="tabBtn-calendar" onclick="switchDashboardTab('calendar')">📅 Calendar</button>
+                    <button class="tab-btn" id="tabBtn-certificates" onclick="switchDashboardTab('certificates')">🎓 Certificates</button>
+                    <button class="tab-btn" id="tabBtn-leaderboard" onclick="switchDashboardTab('leaderboard')">🏆 Leaderboard</button>
+                </div>
+
+                <!-- Tab Panel 1: Overview -->
+                <div id="panel-overview" class="dashboard-panel active">
+                    <div class="grid-4" style="margin-bottom:36px;">
+                        <div class="stat-card"><div class="icon" style="background:var(--marigold);">📋</div><div class="info"><h4>Registered</h4><div class="num" id="dashRegistered">0</div></div></div>
+                        <div class="stat-card"><div class="icon" style="background:var(--teal);">📅</div><div class="info"><h4>Upcoming</h4><div class="num" id="dashUpcoming">0</div></div></div>
+                        <div class="stat-card"><div class="icon" style="background:var(--violet);">🎓</div><div class="info"><h4>Completed</h4><div class="num" id="dashCertificates">0</div></div></div>
+                        <div class="stat-card"><div class="icon" style="background:var(--coral);">❤️</div><div class="info"><h4>Bookmarked</h4><div class="num" id="dashBookmarked">0</div></div></div>
+                    </div>
+                    <div class="grid-2">
+                        <div>
+                            <h3>Registered Events</h3>
+                            <div id="dashEventList" style="margin-top:14px;"></div>
+                            
+                            <h3 style="margin-top:28px;">My Bookmarked Events</h3>
+                            <div id="dashBookmarkList" style="margin-top:14px;"></div>
+                        </div>
+                        <div>
+                            <h3>Quick Actions</h3>
+                            <div style="margin-top:14px; display:flex; flex-direction:column; gap:12px;">
+                                <button class="btn" style="width:100%; justify-content:center;" onclick="showPage('browse')">Browse Events</button>
+                                <button class="btn ghost" style="width:100%; justify-content:center;" onclick="exportStudentCSV()">📥 Export CSV History</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tab Panel 2: Calendar -->
+                <div id="panel-calendar" class="dashboard-panel">
+                    <h3>Your Upcoming Schedule</h3>
+                    <div id="calendarTimeline" class="calendar-timeline">
+                        <!-- Dynamic schedule timeline -->
+                    </div>
+                </div>
+
+                <!-- Tab Panel 3: Certificates -->
+                <div id="panel-certificates" class="dashboard-panel">
+                    <h3>Your Certificates</h3>
+                    <p class="text-muted text-small" style="margin-bottom: 20px;">Earn certificates by attending events and getting marked present by admins.</p>
+                    <div id="certificatesList" class="cert-grid">
+                        <!-- Dynamic completed events certificates list -->
+                    </div>
+                </div>
+
+                <!-- Tab Panel 4: Leaderboard -->
+                <div id="panel-leaderboard" class="dashboard-panel">
+                    <h3>Student Leaderboard</h3>
+                    <p class="text-muted text-small" style="margin-bottom: 20px;">See who is participating most on campus. Earn points by attending fests, workshops, and matches!</p>
+                    <div class="table-wrap">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Rank</th>
+                                    <th>Student Name</th>
+                                    <th>Department</th>
+                                    <th>Badges</th>
+                                    <th>Participation Points</th>
+                                </tr>
+                            </thead>
+                            <tbody id="leaderboardTableBody">
+                                <!-- Populated dynamically -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+    </div>
+
+    <!-- ===== PAGE: MY EVENTS ===== -->
+    <div class="page" id="page-myevents">
+        <section style="padding:80px 0 30px;">
+            <div class="wrap">
+                <div class="sec-head"><div><span class="eyebrow">Student</span><h2>My Events</h2></div><p>All your registered events.</p></div>
+                <div class="event-grid" id="myEventsList"></div>
+            </div>
+        </section>
+    </div>
+
+    <!-- ===== PAGE: ADMIN ===== -->
+    <div class="page" id="page-admin">
+        <section style="padding:80px 0 30px;">
+            <div class="wrap">
+                <div class="sec-head">
+                    <div><span class="eyebrow">Admin Panel</span><h2>Dashboard</h2></div>
+                    <div style="display:flex; gap:10px; flex-wrap:wrap;">
+                        <button class="btn marigold" onclick="openAdminCreateEvent()">+ Add Event</button>
+                        <button class="btn teal" onclick="openAdminCreateClub()">+ Add Club</button>
+                        <button class="btn ghost" onclick="exportAdminCSV()">📥 Export All Registrations (CSV)</button>
+                    </div>
+                </div>
+                <div class="grid-4" style="margin-bottom:36px;">
+                    <div class="stat-card"><div class="icon" style="background:var(--violet);">👨‍🎓</div><div class="info"><h4>Students</h4><div class="num" id="adminStudents">0</div></div></div>
+                    <div class="stat-card"><div class="icon" style="background:var(--marigold);">📋</div><div class="info"><h4>Total Events</h4><div class="num" id="adminEvents">0</div></div></div>
+                    <div class="stat-card"><div class="icon" style="background:var(--teal);">✅</div><div class="info"><h4>Active</h4><div class="num" id="adminActive">0</div></div></div>
+                    <div class="stat-card"><div class="icon" style="background:var(--coral);">📊</div><div class="info"><h4>Registrations</h4><div class="num" id="adminRegistrations">0</div></div></div>
+                </div>
+
+                <!-- Chart.js Graphical Analytics Section -->
+                <div class="grid-2" style="margin-bottom:36px;">
+                    <div class="stat-card" style="flex-direction:column; align-items:stretch;">
+                        <h4 style="margin-bottom:12px; font-family:'JetBrains Mono'; font-size:12px;">Events by Category</h4>
+                        <div style="height:220px; display:flex; justify-content:center;"><canvas id="categoryChart"></canvas></div>
+                    </div>
+                    <div class="stat-card" style="flex-direction:column; align-items:stretch;">
+                        <h4 style="margin-bottom:12px; font-family:'JetBrains Mono'; font-size:12px;">Registrations by Event</h4>
+                        <div style="height:220px; display:flex; justify-content:center;"><canvas id="registrationsChart"></canvas></div>
+                    </div>
+                </div>
+
+                <!-- Registration Attendance Management -->
+                <div style="margin-top:28px; margin-bottom:36px;">
+                    <h3>Manage Registration Attendance</h3>
+                    <p class="text-muted text-small" style="margin-bottom:12px;">Mark student attendance for registered events to issue certificates.</p>
+                    <div class="table-wrap">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Student Name</th>
+                                    <th>Reg No</th>
+                                    <th>Event</th>
+                                    <th>Registered Date</th>
+                                    <th>Attendance Status</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="adminRegistrationsTable">
+                                <!-- Populated dynamically -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- User table -->
+                <div style="margin-top:28px;">
+                    <h3>Registered Users</h3>
+                    <div class="table-wrap">
+                        <table>
+                            <thead><tr><th>Name</th><th>Reg No</th><th>Email</th><th>Dept</th><th>Year</th><th>Phone</th><th>Role</th></tr></thead>
+                            <tbody id="adminUserTable"></tbody>
+                        </table>
+                    </div>
+                </div>
+                <div style="margin-top:36px;">
+                    <h3>All Events</h3>
+                    <div id="adminEventList" style="margin-top:14px;"></div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- ===== FOOTER ===== -->
+    <footer>
+        <div class="wrap">
+            <div class="footer-top">
+                <div class="footer-brand">
+                    <a href="#" class="logo"><span class="dot"></span>Campus Connect</a>
+                    <p>The board where every fest, match and workshop on campus gets pinned.</p>
+                </div>
+                <div class="footer-col">
+                    <h5>Explore</h5>
+                    <a href="#events">Upcoming events</a>
+                    <a href="#">Categories</a>
+                </div>
+                <div class="footer-col">
+                    <h5>Company</h5>
+                    <a href="#">About us</a>
+                    <a href="#contact">Contact</a>
+                </div>
+                <div class="footer-col footer-newsletter">
+                    <h5>Stay in the loop</h5>
+                    <input type="email" placeholder="you@college.edu" />
+                    <button class="btn" style="width:100%; justify-content:center; padding:11px;">Subscribe</button>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>© 2026 Campus Connect. Made on campus.</p>
+                <div class="socials">
+                    <a href="#">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#F3EEE1" stroke-width="2">
+                            <rect x="2" y="2" width="20" height="20" rx="5"/>
+                            <circle cx="12" cy="12" r="4"/>
+                            <circle cx="17.5" cy="6.5" r="1"/>
+                        </svg>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- ===== TOAST CONTAINER ===== -->
+    <div id="toast-container"></div>
+
+    <!-- ===== CERTIFICATE OVERLAY ===== -->
+    <div id="certificateOverlay" class="certificate-overlay">
+        <div class="certificate-box">
+            <button class="close-cert" onclick="closeCertificate()">✕</button>
+            <div class="cert-org">University Campus Board</div>
+            <h2 class="cert-title">Certificate of Completion</h2>
+            <div class="cert-body">
+                This is to certify that
+                <br>
+                <span class="cert-recipient" id="certRecipient">Student Name</span>
+                <br>
+                has successfully participated in and completed
+                <br>
+                <span class="cert-event-name" id="certEvent">Event Name</span>
+                <br>
+                held at <span id="certVenue">Venue</span> on <span id="certDate">Date</span>.
+            </div>
+            <div class="cert-meta-row">
+                <div class="cert-qr">
+                    <span class="code-badge" id="certCode">CERT-0000</span>
+                    <span style="font-size: 8px; color: #888;">VERIFIED DATA SECURE</span>
+                </div>
+                <div class="cert-sign">
+                    <span>Authorized Signature</span>
+                    <div class="line">Campus Director</div>
+                </div>
+            </div>
+            <button class="btn marigold small" style="margin-top: 36px;" onclick="window.print()">Print / PDF →</button>
+        </div>
+    </div>
+
+    <!-- ===== STUDENT ID CARD OVERLAY ===== -->
+    <div class="overlay" id="idCardOverlay">
+        <div class="overlay-card" style="max-width: 380px; padding: 2rem 1.5rem;">
+            <button class="overlay-close" onclick="closeIdCard()">✕</button>
+            <div class="id-card">
+                <div class="id-top">
+                    <span class="logo"><span class="dot"></span>CC</span>
+                    <span class="mono" style="font-size: 11px; font-weight:700; color:var(--marigold);">STUDENT ID</span>
+                </div>
+                <div style="display:flex; flex-direction:column; align-items:center; text-align:center;">
+                    <div class="id-avatar" id="idAvatar">🎓</div>
+                    <h3 class="display" style="font-size:18px; margin-bottom:4px; color:var(--paper);" id="idCardName">Priya Menon</h3>
+                    <p class="mono" style="font-size:11px; color:var(--marigold); margin-bottom:14px;" id="idCardRegNo">2024CS101</p>
+                    
+                    <div style="width:100%; border-top:1px dashed rgba(243,238,225,0.2); padding-top:14px; text-align:left; font-size:13px; display:flex; flex-direction:column; gap:6px;">
+                        <div style="display:flex; justify-content:space-between;"><span style="opacity:0.6;">Dept:</span><span id="idCardDept" style="font-weight:700;">Computer Science</span></div>
+                        <div style="display:flex; justify-content:space-between;"><span style="opacity:0.6;">Year:</span><span id="idCardYear" style="font-weight:700;">3rd Year</span></div>
+                        <div style="display:flex; justify-content:space-between;"><span style="opacity:0.6;">Points:</span><span id="idCardPoints" style="font-weight:700; color:var(--marigold);">120 pts</span></div>
+                    </div>
+                    
+                    <div class="id-qr">
+                        <canvas id="idCardQR" width="100" height="100"></canvas>
+                    </div>
+                    <span style="font-size:8px; opacity:0.5; margin-top:6px; letter-spacing:0.05em;">SECURE CAMPUS ACCESS VERIFIED</span>
+                </div>
+            </div>
+            <button class="btn marigold small" style="width:100%; justify-content:center; margin-top:20px;" onclick="window.print()">Print Card →</button>
+        </div>
+    </div>
+
+    <!-- ===== EVENT FEEDBACK MODAL ===== -->
+    <div class="overlay" id="feedbackOverlay">
+        <div class="overlay-card" style="max-width:440px;">
+            <button class="overlay-close" onclick="closeFeedbackModal()">✕</button>
+            <div class="brand"><span class="dot"></span><h1>Event Feedback</h1></div>
+            <span class="eyebrow">Share your thoughts</span>
+            <h4 id="feedbackEventName" style="margin-top:10px; margin-bottom:14px;">Generative AI Workshop</h4>
+            <form onsubmit="handleFeedbackSubmit(event)">
+                <input type="hidden" id="feedbackRegId" />
+                <div class="input-group">
+                    <label>Rating</label>
+                    <div class="star-row" id="feedbackStars">
+                        <span onclick="setFeedbackRating(1)">★</span>
+                        <span onclick="setFeedbackRating(2)">★</span>
+                        <span onclick="setFeedbackRating(3)">★</span>
+                        <span onclick="setFeedbackRating(4)">★</span>
+                        <span onclick="setFeedbackRating(5)">★</span>
+                    </div>
+                </div>
+                <div class="input-group">
+                    <label>Comments / Suggestions</label>
+                    <textarea id="feedbackComment" placeholder="Tell us what you liked or how we can improve..." rows="3" required></textarea>
+                </div>
+                <button class="btn marigold" style="width:100%; justify-content:center;" type="submit">Submit Feedback →</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- ===== ADMIN CREATE CLUB OVERLAY ===== -->
+    <div class="overlay" id="adminCreateClubOverlay">
+        <div class="overlay-card" style="max-width:500px;">
+            <button class="overlay-close" onclick="closeAdminCreateClub()">✕</button>
+            <div class="brand"><span class="dot"></span><h1>Add Club</h1></div>
+            <form onsubmit="handleAdminCreateClub(event)">
+                <div class="input-group"><label>Club Name</label><input id="aclubName" type="text" placeholder="e.g. Robotics Society" required /></div>
+                <div class="input-group"><label>Category</label>
+                    <select id="aclubCategory" required>
+                        <option value="">Select</option>
+                        <option value="Technical">Technical</option>
+                        <option value="Cultural">Cultural</option>
+                        <option value="Sports">Sports</option>
+                        <option value="Workshops">Workshops</option>
+                    </select>
+                </div>
+                <div class="input-group"><label>Description</label><textarea id="aclubDesc" placeholder="Describe your club..." rows="3" required></textarea></div>
+                <div class="input-group"><label>Initial Members Count</label><input id="aclubMembers" type="number" value="0" min="0" required /></div>
+                <button class="btn marigold" style="width:100%; justify-content:center; margin-top:0.5rem;" type="submit">Create Club →</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- ===== CHATBOT WIDGET ===== -->
+    <button class="chat-fab" id="chatFab" onclick="toggleChatPanel()" title="Campus Assistant">💬</button>
+    <div class="chat-panel" id="chatPanel">
+        <div class="chat-head">
+            <span>🤖 CC Assistant</span>
+            <button onclick="toggleChatPanel()" style="background:none; border:none; color:var(--paper); cursor:pointer; font-size:16px;">✕</button>
+        </div>
+        <div class="chat-body" id="chatBody">
+            <div class="chat-msg bot">Hi! I am the Campus Connect assistant. Ask me anything about events, venues, or clubs!</div>
+        </div>
+        <form class="chat-input-row" onsubmit="handleChatSubmit(event)">
+            <input type="text" id="chatInput" placeholder="Ask about events, venues..." required />
+            <button type="submit">Send</button>
+        </form>
+    </div>
+
+    <!-- External script -->
+    <script src="/static/js/script.js"></script>
+
+</body>
+</html>
