@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Campus Connect — Event Management System
 
 A campus event management web application built with HTML, CSS, and JavaScript.
@@ -46,3 +47,7 @@ Open `templates/index.html` directly in browser.
 - ⚡ Admin dashboard — add/delete events
 - 💾 Data persisted via localStorage
 - 📱 Fully responsive design
+=======
+# CampusConnect
+**Campus Connect** is a web-based college event management system that enables administrators to create and manage events while allowing students to browse, register, and download event brochures. It streamlines event organization through a user-friendly and responsive interface.
+>>>>>>> eb59fac8eeabee4785ef9f66971ed1bb7d2c1b24
