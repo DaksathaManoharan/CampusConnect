@@ -25,7 +25,7 @@ exp/
 ```bash
 python server.py
 ```
-Opens automatically at → **http://localhost:8000**
+Opens automatically at → **[http://localhost:8000](https://campusconnect-2dqk.onrender.com)**
 
 ### Option 2 — Direct (limited)
 Open `templates/index.html` directly in browser.
